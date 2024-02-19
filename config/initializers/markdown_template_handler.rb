@@ -1,14 +1,14 @@
 class CodeRayify < Redcarpet::Render::HTML
   def block_code(code, language)
-    if !Gem.loaded_specs.has_key?('coderay') ||  language == nil || language == "" 
+    if !Gem.loaded_specs.has_key?('coderay') ||  language == nil || language == ""
       %(<div class="CodeRay"><div class="code"><pre>#{code}</pre></div></div>)
-    else 
-      CodeRay.scan(code, language).div 
+    else
+      CodeRay.scan(code, language).div
     end
   end
 end
 
-module MarkdownTemplateHandler  
+module MarkdownTemplateHandler
   def self.erb
     @erb ||= ActionView::Template.registered_template_handler(:erb)
   end
@@ -20,8 +20,10 @@ module MarkdownTemplateHandler
     else
       erb.call(template)
     end
-    
-    %(Redcarpet::Markdown.new(CodeRayify.new(:filter_html => false, 
+
+    # convert rendered output buffer to string per
+    # https://stackoverflow.com/a/77549305
+    %(Redcarpet::Markdown.new(CodeRayify.new(:filter_html => false,
                                             :hard_wrap => true),
                             no_intra_emphasis:            true,
                             fenced_code_blocks:           true,
@@ -32,8 +34,8 @@ module MarkdownTemplateHandler
                             tables:                       true,
                             with_toc_data:                true,
                             autolink:                     true
-                          ).render(begin;#{compiled_source};end).html_safe)
-                          
+                          ).render(begin;#{compiled_source};end.to_s).html_safe)
+
   end
 end
 
